@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/TCP-UDP.iml" filepath="$PROJECT_DIR$/.idea/TCP-UDP.iml" />
-      <module fileurl="file://$PROJECT_DIR$/TCP-UDP-Implementation.iml" filepath="$PROJECT_DIR$/TCP-UDP-Implementation.iml" />
     </modules>
   </component>
 </project>
