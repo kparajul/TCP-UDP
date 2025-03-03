@@ -26,9 +26,7 @@ public class ClientTCP {
                 long sharedKey = 0x01AB44AB229867EFL;
                 message = messageGenerator(packetSize);
                 byte[] messageBack = new byte[packetSize];
-                //System.out.println("Initial message: " + humanReadable(message));
                 encryptedMessage = encryptionFunction(message, sharedKey); //encrypted
-                //System.out.println("Encrypted message: " + humanReadable(encryptedMessage));
 
                 //start time
                 long startTime = System.nanoTime();
@@ -37,11 +35,9 @@ public class ClientTCP {
                 outputStream.flush();
                 //response
                 int respSize = inputStream.read(messageBack);
-                //System.out.println("received message: " + humanReadable(messageBack));
                 if (respSize == packetSize) { //validating only using the size
                     long finalTime = System.nanoTime();
                     decryptedMessage = encryptionFunction(messageBack, sharedKey); //decrypted
-                    //System.out.println("Decrypted received message: " + humanReadable(decryptedMessage));
 
                     if (Arrays.equals(message, decryptedMessage)) {
                         rtt = finalTime - startTime;
