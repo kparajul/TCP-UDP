@@ -4,40 +4,57 @@ import javax.xml.crypto.Data;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class ServerTCP {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         long sharedKey = 0x01AB44AB229867EFL;
         byte[] received;
-        int size;
+        byte[] decrypted;
+        byte[] encrypted;
+        byte[] buffer = new byte[512];
+        int bytes;
+
         ServerSocket serv = new ServerSocket(26912);
         Socket serverSocket = serv.accept();
         System.out.println("Connection established yipiee");
+
         InputStream inputStream = serverSocket.getInputStream();
         OutputStream outputStream = serverSocket.getOutputStream();
 
-        try {
-            while (true) {
-                received = inputStream.readNBytes(8);
-                if (received.length == 0){
-                    System.out.println("Client disconnected");
-                    break;
-                }
-                System.out.println("Received encrypted message: " + humanReadable(received));
-                received = encryptionFunction(received, sharedKey);
-                System.out.println("Received decrypted message: " + humanReadable(received));
-                received = encryptionFunction(received, sharedKey);
-                outputStream.write(received);
-                outputStream.flush();
-            }
-        }catch (IOException e){
-            System.out.println("disconnected");
-        }finally {
-            serverSocket.close();
-            serv.close();
+        while ((bytes = inputStream.read(buffer)) != -1) {
+            received = Arrays.copyOf(buffer, bytes);
+            decrypted = encryptionFunction(received, sharedKey);
+            encrypted = encryptionFunction(decrypted, sharedKey);
+            outputStream.write(encrypted);
+            outputStream.flush();
         }
-
+        System.out.println("Client disconnected");
+        serverSocket.close();
+        serv.close();
     }
+
+//        try {
+//            while (true) {
+//                received = inputStream.readNBytes(8);
+//                if (received.length == 0){
+//                    System.out.println("Client disconnected");
+//                    break;
+//                }
+//                //System.out.println("Received encrypted message: " + humanReadable(received));
+//                received = encryptionFunction(received, sharedKey);
+//                //System.out.println("Received decrypted message: " + humanReadable(received));
+//                received = encryptionFunction(received, sharedKey);
+//                outputStream.write(received);
+//                outputStream.flush();
+//            }
+//        }catch (IOException e){
+//            System.out.println("disconnected");
+//        }finally {
+//            serverSocket.close();
+//            serv.close();
+//        }
+
 //    public static String humanReadable(byte[] message) throws UnsupportedEncodingException {
 //        return new String(message, "UTF-8");
 //    }

@@ -3,8 +3,6 @@ package org.example;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +11,7 @@ import java.util.Random;
 
 public class ClientTCP {
      public static void main(String[] args) throws IOException {
-        int byteSize = 8;
+        List<Integer> size = List.of(8,64,256,512);
         List<Double> time = new ArrayList<>();
         Socket socket = new Socket("pi.cs.oswego.edu", 26912);
         OutputStream outputStream = socket.getOutputStream();
@@ -21,52 +19,57 @@ public class ClientTCP {
         double rtt;
         byte[] message;
         byte[] encryptedMessage;
-        byte[] messageBack = new byte[byteSize];
          byte[] decryptedMessage;
+        for(int packetSize: size) {
+            for (int i = 0; i < 30; i++) {
+                //I can't understand why I had to put L in the end to indicate this value was a long even though it's declared as a long
+                long sharedKey = 0x01AB44AB229867EFL;
+                message = messageGenerator(packetSize);
+                byte[] messageBack = new byte[packetSize];
+                //System.out.println("Initial message: " + humanReadable(message));
+                encryptedMessage = encryptionFunction(message, sharedKey); //encrypted
+                //System.out.println("Encrypted message: " + humanReadable(encryptedMessage));
 
-        for (int i = 0; i<30; i++) {
-            //I can't understand why I had to put L in the end to indicate this value was a long even though it's declared as a long
-            long sharedKey = 0x01AB44AB229867EFL;
-            message = messageGenerator(byteSize);
-            //System.out.println("Initial message: " + humanReadable(message));
-            encryptedMessage = encryptionFunction(message, sharedKey); //encrypted
-            //System.out.println("Encrypted message: " + humanReadable(encryptedMessage));
+                //start time
+                long startTime = System.nanoTime();
+                //send data
+                outputStream.write(encryptedMessage);
+                outputStream.flush();
+                //response
+                int respSize = inputStream.read(messageBack);
+                //System.out.println("received message: " + humanReadable(messageBack));
+                if (respSize == packetSize) { //validating only using the size
+                    long finalTime = System.nanoTime();
+                    decryptedMessage = encryptionFunction(messageBack, sharedKey); //decrypted
+                    //System.out.println("Decrypted received message: " + humanReadable(decryptedMessage));
 
-            //start time
-            long startTime = System.nanoTime();
-            //send data
-            outputStream.write(encryptedMessage);
-            outputStream.flush();
-            //response
-            int respSize = inputStream.read(messageBack);
-            //System.out.println("received message: " + humanReadable(messageBack));
-            if (respSize == byteSize) { //validating only using the size
-                long finalTime = System.nanoTime();
-                decryptedMessage = encryptionFunction(messageBack, sharedKey); //decrypted
-                //System.out.println("Decrypted received message: " + humanReadable(decryptedMessage));
+                    if (Arrays.equals(message, decryptedMessage)) {
+                        rtt = finalTime - startTime;
+                        Double rttSecond = rtt / 1000000000;
+                        time.add(rttSecond);
 
-                if (Arrays.equals(message, decryptedMessage)) {
-                    System.out.println("The received message matches the sent message");
-                }else {
-                    System.out.println("Messages don't match");
+                    } else {
+                        System.out.println("Messages don't match");
+                    }
+                    //System.out.println("RTT for " + byteSize + " bytes transfer is " + rttSecond + "seconds");
+                } else {
+                    System.out.println("Size mismatch");
+                    socket.close();
                 }
 
-                rtt = finalTime - startTime;
-                Double rttSecond = rtt / 1000000000;
-                time.add(rttSecond);
-                //System.out.println("RTT for " + byteSize + " bytes transfer is " + rttSecond + "seconds");
-            } else {
-                System.out.println("Size mismatch");
-                socket.close();
             }
+            finalRTT(time, packetSize);
         }
         socket.close();
-        Double sum = 0.0;
+    }
+
+    public static void finalRTT(List<Double> time, int byteSize){
+         Double sum = 0.0;
         for( Double t : time){
             sum += t;
         }
         Double finalRTT = sum/(time.size());
-        System.out.println("Average rtt: " + finalRTT);
+        System.out.println("Average rtt for size " + byteSize + " is " + finalRTT + " seconds");
     }
 
     public static byte[] messageGenerator(int num){
