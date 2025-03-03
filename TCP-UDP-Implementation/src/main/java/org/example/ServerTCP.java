@@ -1,29 +1,42 @@
 package org.example;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import javax.xml.crypto.Data;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ServerTCP {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         long sharedKey = 0x01AB44AB229867EFL;
         byte[] received;
-        ServerSocket serv = new ServerSocket(8080);
+        int size;
+        ServerSocket serv = new ServerSocket(26912);
         Socket serverSocket = serv.accept();
         System.out.println("Connection established yipiee");
         InputStream inputStream = serverSocket.getInputStream();
         OutputStream outputStream = serverSocket.getOutputStream();
-        received = inputStream.readNBytes(512);
-        System.out.println("Received encrypted message: " + humanReadable(received));
-        received = encryptionFunction(received, sharedKey);
-        System.out.println("Received decrypted message: " + humanReadable(received));
-        received = encryptionFunction(received, sharedKey);
-        outputStream.write(received);
-        outputStream.flush();
-        serverSocket.close();
+
+        try {
+            while (true) {
+                received = inputStream.readNBytes(8);
+                if (received.length == 0){
+                    System.out.println("Client disconnected");
+                    break;
+                }
+                System.out.println("Received encrypted message: " + humanReadable(received));
+                received = encryptionFunction(received, sharedKey);
+                System.out.println("Received decrypted message: " + humanReadable(received));
+                received = encryptionFunction(received, sharedKey);
+                outputStream.write(received);
+                outputStream.flush();
+            }
+        }catch (IOException e){
+            System.out.println("disconnected");
+        }finally {
+            serverSocket.close();
+            serv.close();
+        }
+
     }
 //    public static String humanReadable(byte[] message) throws UnsupportedEncodingException {
 //        return new String(message, "UTF-8");

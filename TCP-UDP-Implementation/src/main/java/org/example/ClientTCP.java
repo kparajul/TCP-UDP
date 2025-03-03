@@ -4,43 +4,69 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class ClientTCP {
-    public static void main(String[] args) throws IOException {
-        int byteSize = 512;
-        //I can't understand why I had to put L in the end to indicate this value was a long even though it's declared as a long
-        long sharedKey = 0x01AB44AB229867EFL;
-        byte[] message = messageGenerator(byteSize);
-
-        System.out.println("Unencrypted message: " + humanReadable(message));
-        message = encryptionFunction(message, sharedKey); //encrypting
-        System.out.println("Encrypted message: " + humanReadable(message));
-
-        byte[] messageBack = new byte[byteSize];
-        double rtt;
-
-        Socket socket = new Socket("localhost", 8080);
-        System.out.println("Connection established");
+     public static void main(String[] args) throws IOException {
+        int byteSize = 8;
+        List<Double> time = new ArrayList<>();
+        Socket socket = new Socket("pi.cs.oswego.edu", 26912);
         OutputStream outputStream = socket.getOutputStream();
         InputStream inputStream = socket.getInputStream();
-        long startTime = System.nanoTime();
-        outputStream.write(message);
-        outputStream.flush();
-        int respSize = inputStream.read(messageBack);
-        if(respSize == byteSize){ //validating only using the size
-            long finalTime = System.nanoTime();
-            socket.close();
-            System.out.println("Received encrypted message:" + humanReadable(messageBack));
-            messageBack = encryptionFunction(messageBack, sharedKey); //decrypting
-            System.out.println("Received decrypted message:" + humanReadable(messageBack));
-            rtt = finalTime-startTime;
-            System.out.println(rtt);
-        }else {
-            System.out.println("Size mismatch");
-            socket.close();
+        double rtt;
+        byte[] message;
+        byte[] encryptedMessage;
+        byte[] messageBack = new byte[byteSize];
+         byte[] decryptedMessage;
+
+        for (int i = 0; i<30; i++) {
+            //I can't understand why I had to put L in the end to indicate this value was a long even though it's declared as a long
+            long sharedKey = 0x01AB44AB229867EFL;
+            message = messageGenerator(byteSize);
+            //System.out.println("Initial message: " + humanReadable(message));
+            encryptedMessage = encryptionFunction(message, sharedKey); //encrypted
+            //System.out.println("Encrypted message: " + humanReadable(encryptedMessage));
+
+            //start time
+            long startTime = System.nanoTime();
+            //send data
+            outputStream.write(encryptedMessage);
+            outputStream.flush();
+            //response
+            int respSize = inputStream.read(messageBack);
+            //System.out.println("received message: " + humanReadable(messageBack));
+            if (respSize == byteSize) { //validating only using the size
+                long finalTime = System.nanoTime();
+                decryptedMessage = encryptionFunction(messageBack, sharedKey); //decrypted
+                //System.out.println("Decrypted received message: " + humanReadable(decryptedMessage));
+
+                if (Arrays.equals(message, decryptedMessage)) {
+                    System.out.println("The received message matches the sent message");
+                }else {
+                    System.out.println("Messages don't match");
+                }
+
+                rtt = finalTime - startTime;
+                Double rttSecond = rtt / 1000000000;
+                time.add(rttSecond);
+                //System.out.println("RTT for " + byteSize + " bytes transfer is " + rttSecond + "seconds");
+            } else {
+                System.out.println("Size mismatch");
+                socket.close();
+            }
         }
+        socket.close();
+        Double sum = 0.0;
+        for( Double t : time){
+            sum += t;
+        }
+        Double finalRTT = sum/(time.size());
+        System.out.println("Average rtt: " + finalRTT);
     }
 
     public static byte[] messageGenerator(int num){
@@ -59,18 +85,19 @@ public class ClientTCP {
     }
 
     public static byte[] encryptionFunction(byte[] message, long sharedKey){
+         byte[] returnMessage = message.clone();
         long key = sharedKey;
-        for(int i = 0; i<message.length; i += 8){
+        for(int i = 0; i<returnMessage.length; i += 8){
             key = XORShift(key);
             //for every i (0-7), there will be j(0-7) so each i+j is 0-7 depending on i
-            for(int j = 0; j < 8 && (i+j) < message.length; j++){
+            for(int j = 0; j < 8 && (i+j) < returnMessage.length; j++){
                 //the j represents the position of the message we are trying to xor
                 //shifting needs to be explained in person
-                message[i+j] = (byte) (message[i+j] ^ (key >>> (8*(7-j)) & 0xFF));
+                returnMessage[i+j] = (byte) (returnMessage[i+j] ^ (key >>> (8*(7-j)) & 0xFF));
             }
 
         }
-        return message;
+        return returnMessage;
     }
 
     public static long XORShift(long r){
