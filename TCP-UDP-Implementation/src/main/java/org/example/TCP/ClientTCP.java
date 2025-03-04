@@ -35,23 +35,19 @@ public class ClientTCP {
                 outputStream.flush();
                 //response
                 int respSize = inputStream.read(messageBack);
-                if (respSize == packetSize) { //validating only using the size
-                    long finalTime = System.nanoTime();
-                    decryptedMessage = encryptionFunction(messageBack, sharedKey); //decrypted
-
+                decryptedMessage = encryptionFunction(messageBack, sharedKey);
+                     //decrypted
                     if (Arrays.equals(message, decryptedMessage)) {
+                        long finalTime = System.nanoTime();
                         rtt = finalTime - startTime;
                         Double rttSecond = rtt / 1000000000;
                         time.add(rttSecond);
 
                     } else {
                         System.out.println("Messages don't match");
+                        socket.close();
                     }
                     //System.out.println("RTT for " + byteSize + " bytes transfer is " + rttSecond + "seconds");
-                } else {
-                    System.out.println("Size mismatch");
-                    socket.close();
-                }
 
             }
             finalRTT(time, packetSize);
