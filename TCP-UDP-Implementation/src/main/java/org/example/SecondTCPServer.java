@@ -21,23 +21,44 @@ public class SecondTCPServer {
         System.out.println("Connection established yipiee");
         InputStream inputStream = serverSocket.getInputStream();
         OutputStream outputStream = serverSocket.getOutputStream();
-        //System.out.println(inputStream.readNBytes(1000000));
-//
 
-        byte[][] total = new byte[1024][1024];
-        int index = 0;
+        byte[][] total1024 = new byte[1024][1024];
+        byte[][] total512 = new byte[2048][512];
+        byte[][] total256 = new byte[4096][256];
+
+        int index1024 = 0;
+        int index512 = 0;
+        int index256 = 0;
 
         while((bytes = inputStream.read(buffer)) != -1){
 
             if(bytes == 1024){
-                total[index] = Arrays.copyOf(buffer, bytes);
-                index++;
+                total1024[index1024] = Arrays.copyOf(buffer, bytes);
+                index1024++;
+                outputStream.write(message);
+                outputStream.flush();
+            } else if(bytes == 512){
+                total512[index512] = Arrays.copyOf(buffer, bytes);
+                index512++;
+                outputStream.write(message);
+                outputStream.flush();
+            } else if(bytes == 256){
+                total256[index256] = Arrays.copyOf(buffer, bytes);
+                index256++;
                 outputStream.write(message);
                 outputStream.flush();
             }
+
         }
-        for(byte[] t : total){
-            System.out.println(getString(encryptionFunction(t, sharedKey)));
+
+        for(byte[] t : total1024){
+            System.out.println("1024" + getString(encryptionFunction(t, sharedKey)));
+        }
+        for(byte[] t : total512){
+            System.out.println("512" + getString(encryptionFunction(t, sharedKey)));
+        }
+        for(byte[] t : total256){
+            System.out.println("256" + getString(encryptionFunction(t, sharedKey)));
         }
         System.out.println("Client disconnected");
         serverSocket.close();

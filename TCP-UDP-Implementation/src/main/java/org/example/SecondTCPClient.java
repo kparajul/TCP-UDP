@@ -11,8 +11,9 @@ import java.util.Random;
 public class SecondTCPClient {
     public static void main(String[] args) throws IOException {
         List<Integer> size = List.of(1024, 512, 256);
-        List<Double> time = new ArrayList<>();
         List<Double> time1024 = new ArrayList<>();
+        List<Double> time512 = new ArrayList<>();
+        List<Double> time256 = new ArrayList<>();
         Socket socket = new Socket("localhost", 26914);
         OutputStream outputStream = socket.getOutputStream();
         InputStream inputStream = socket.getInputStream();
@@ -20,7 +21,7 @@ public class SecondTCPClient {
         byte[] message;
         byte[] response = new byte[8];
         for(int packetSize: size) {
-            for (int i = 0; i < 30; i++) {
+            for (int i = 0; i < 1; i++) {
                 if(packetSize == 1024){
                     byte[][] packets = new byte[1024][1024];
                     for(int x=0; x<1024; x++){
@@ -30,42 +31,65 @@ public class SecondTCPClient {
 
                     long start1024 = System.nanoTime();
                     for (byte[] packet: packets){
-                        System.out.println(getString(packet));
+                        //System.out.println(getString(packet));
                         outputStream.write(packet);
                         outputStream.flush();
                         response = inputStream.readNBytes(8);
-                        System.out.println(humanReadable(response));
+                        //System.out.println(humanReadable(response));
                     }
                     long end1024 = System.nanoTime();
                     double difference = end1024-start1024;
                     time1024.add(difference);
 
-                }else if(packetSize == 1024){
-                    byte[][] packets = new byte[1024][1024];
-                    for(int x=0; x<1024; x++){
-                        message = messageGenerator(1024);
+                }else if(packetSize == 512){
+                    byte[][] packets = new byte[2048][512];
+                    for(int x=0; x<2048; x++){
+                        message = messageGenerator(512);
                         packets[x] = encryptionFunction(message, sharedKey);
                     }
 
-                    long start1024 = System.nanoTime();
+                    long start512 = System.nanoTime();
                     for (byte[] packet: packets){
-                        System.out.println(getString(packet));
+                        //System.out.println(getString(packet));
                         outputStream.write(packet);
                         outputStream.flush();
                         response = inputStream.readNBytes(8);
-                        System.out.println(humanReadable(response));
+                        //System.out.println(humanReadable(response));
                     }
-                    long end1024 = System.nanoTime();
-                    double difference = end1024-start1024;
-                    time1024.add(difference);
+                    long end512 = System.nanoTime();
+                    double difference = end512-start512;
+                    time512.add(difference);
+
+                }else if(packetSize == 256){
+                    byte[][] packets = new byte[4096][256];
+                    for(int x=0; x<4096; x++){
+                        message = messageGenerator(256);
+                        packets[x] = encryptionFunction(message, sharedKey);
+                    }
+
+                    long start256 = System.nanoTime();
+                    for (byte[] packet: packets){
+                        //System.out.println(getString(packet));
+                        outputStream.write(packet);
+                        outputStream.flush();
+                        response = inputStream.readNBytes(8);
+                        //System.out.println(humanReadable(response));
+                    }
+                    long end256 = System.nanoTime();
+                    double difference = end256-start256;
+                    time256.add(difference);
 
                 }
 
             }
-            System.out.println(humanReadable(response));
-            Double throughput = calculateThroughput(packetSize, time1024);
-            System.out.println("Throughput for " + packetSize + " bytes is " + throughput);
         }
+        //System.out.println(humanReadable(response));
+        Double throughput1024 = calculateThroughput(1024, time1024);
+        Double throughput512 = calculateThroughput(512, time512);
+        Double throughput256 = calculateThroughput(256, time256);
+        System.out.println("Throughput for 1024 bytes is " + throughput1024);
+        System.out.println("Throughput for 512 bytes is " + throughput512);
+        System.out.println("Throughput for 256 bytes is " + throughput256);
         socket.close();
     }
 
