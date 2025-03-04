@@ -13,7 +13,7 @@ public class ClientTCP {
      public static void main(String[] args) throws IOException {
         List<Integer> size = List.of(8,64,256,512);
         List<Double> time = new ArrayList<>();
-        Socket socket = new Socket("pi.cs.oswego.edu", 26912);
+        Socket socket = new Socket("moxie.cs.oswego.edu", 26914);
         OutputStream outputStream = socket.getOutputStream();
         InputStream inputStream = socket.getInputStream();
         double rtt;
