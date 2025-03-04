@@ -1,4 +1,4 @@
-package org.example;
+package org.example.TCP;
 
 import javax.xml.crypto.Data;
 import java.io.*;
@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.Arrays;
 
 public class ServerTCP {
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException {
         long sharedKey = 0x01AB44AB229867EFL;
         byte[] received;
         byte[] decrypted;

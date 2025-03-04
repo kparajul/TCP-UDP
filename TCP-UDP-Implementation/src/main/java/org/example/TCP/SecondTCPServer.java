@@ -1,8 +1,9 @@
-package org.example;
+package org.example.TCP;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.io.ByteArrayOutputStream;
 
@@ -10,7 +11,7 @@ public class SecondTCPServer {
     public static void main(String[] args) throws IOException {
         long sharedKey = 0x01AB44AB229867EFL;
         //byte[] receivedData = new byte[1048576];
-        byte[] message = new byte[]{0x01, 0x23, 0x45, 0x67, (byte) 0x89, (byte) 0xAB, (byte) 0xCD, (byte) 0xEF};
+        byte[] message = new byte[8];
 
         byte[] buffer = new byte[1024];
         int bytes;
@@ -26,6 +27,7 @@ public class SecondTCPServer {
         byte[][] total512 = new byte[2048][512];
         byte[][] total256 = new byte[4096][256];
 
+
         int index1024 = 0;
         int index512 = 0;
         int index256 = 0;
@@ -34,31 +36,31 @@ public class SecondTCPServer {
 
             if(bytes == 1024){
                 total1024[index1024] = Arrays.copyOf(buffer, bytes);
+                message = ByteBuffer.allocate(8).putInt(index1024+1).putInt(index1024+1).array();
                 index1024++;
-                outputStream.write(message);
-                outputStream.flush();
             } else if(bytes == 512){
                 total512[index512] = Arrays.copyOf(buffer, bytes);
+                message = ByteBuffer.allocate(8).putInt(index512+1).putInt(index512+1).array();
                 index512++;
-                outputStream.write(message);
-                outputStream.flush();
             } else if(bytes == 256){
                 total256[index256] = Arrays.copyOf(buffer, bytes);
+                message = ByteBuffer.allocate(8).putInt(index256+1).putInt(index256+1).array();
                 index256++;
-                outputStream.write(message);
-                outputStream.flush();
             }
+
+            outputStream.write(message);
+            outputStream.flush();
 
         }
 
         for(byte[] t : total1024){
-            System.out.println("1024" + getString(encryptionFunction(t, sharedKey)));
+            System.out.println("1024 " + getString(encryptionFunction(t, sharedKey)));
         }
         for(byte[] t : total512){
-            System.out.println("512" + getString(encryptionFunction(t, sharedKey)));
+            System.out.println("512 " + getString(encryptionFunction(t, sharedKey)));
         }
         for(byte[] t : total256){
-            System.out.println("256" + getString(encryptionFunction(t, sharedKey)));
+            System.out.println("256 " + getString(encryptionFunction(t, sharedKey)));
         }
         System.out.println("Client disconnected");
         serverSocket.close();

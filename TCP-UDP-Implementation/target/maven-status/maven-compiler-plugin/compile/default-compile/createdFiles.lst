@@ -1,2 +1,4 @@
+org/example/SecondTCPServer.class
+org/example/SecondTCPClient.class
 org/example/ServerTCP.class
 org/example/ClientTCP.class

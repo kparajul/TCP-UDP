@@ -1,9 +1,10 @@
-package org.example;
+package org.example.TCP;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -14,15 +15,18 @@ public class SecondTCPClient {
         List<Double> time1024 = new ArrayList<>();
         List<Double> time512 = new ArrayList<>();
         List<Double> time256 = new ArrayList<>();
-        Socket socket = new Socket("localhost", 26914);
+        Socket socket = new Socket("moxie.cs.oswego.edu", 26914);
         OutputStream outputStream = socket.getOutputStream();
         InputStream inputStream = socket.getInputStream();
         long sharedKey = 0x01AB44AB229867EFL;
         byte[] message;
-        byte[] response = new byte[8];
+        byte[] response;
+        int expectedValue;
+        int receivedValue;
+
         for(int packetSize: size) {
-            for (int i = 0; i < 1; i++) {
                 if(packetSize == 1024){
+                    int temp= 0;
                     byte[][] packets = new byte[1024][1024];
                     for(int x=0; x<1024; x++){
                         message = messageGenerator(1024);
@@ -31,17 +35,25 @@ public class SecondTCPClient {
 
                     long start1024 = System.nanoTime();
                     for (byte[] packet: packets){
-                        //System.out.println(getString(packet));
                         outputStream.write(packet);
                         outputStream.flush();
                         response = inputStream.readNBytes(8);
-                        //System.out.println(humanReadable(response));
+
+                        expectedValue = (temp + 1);
+                        receivedValue = ByteBuffer.wrap(response).getInt();
+
+                        if (receivedValue != expectedValue){
+                            //System.out.println( receivedValue + "raa" + expectedValue);
+                            System.out.println("Wrong response");
+                        }
+                        temp++;
                     }
                     long end1024 = System.nanoTime();
                     double difference = end1024-start1024;
                     time1024.add(difference);
 
                 }else if(packetSize == 512){
+                    int temp= 0;
                     byte[][] packets = new byte[2048][512];
                     for(int x=0; x<2048; x++){
                         message = messageGenerator(512);
@@ -50,17 +62,26 @@ public class SecondTCPClient {
 
                     long start512 = System.nanoTime();
                     for (byte[] packet: packets){
-                        //System.out.println(getString(packet));
                         outputStream.write(packet);
                         outputStream.flush();
                         response = inputStream.readNBytes(8);
-                        //System.out.println(humanReadable(response));
+
+                        expectedValue = (temp + 1);
+                        receivedValue = ByteBuffer.wrap(response).getInt();
+
+                        if (receivedValue != expectedValue){
+                            //System.out.println( receivedValue + "raa" + expectedValue);
+                            System.out.println("Wrong response");
+                        }
+                        temp++;
+
                     }
                     long end512 = System.nanoTime();
                     double difference = end512-start512;
                     time512.add(difference);
 
                 }else if(packetSize == 256){
+                    int temp = 0;
                     byte[][] packets = new byte[4096][256];
                     for(int x=0; x<4096; x++){
                         message = messageGenerator(256);
@@ -69,37 +90,41 @@ public class SecondTCPClient {
 
                     long start256 = System.nanoTime();
                     for (byte[] packet: packets){
-                        //System.out.println(getString(packet));
                         outputStream.write(packet);
                         outputStream.flush();
                         response = inputStream.readNBytes(8);
-                        //System.out.println(humanReadable(response));
+
+                        expectedValue = (temp + 1);
+                        receivedValue = ByteBuffer.wrap(response).getInt();
+                        if (receivedValue != expectedValue){
+                            //System.out.println( receivedValue + "raa" + expectedValue);
+                            System.out.println("Wrong response");
+                        }
+                        temp++;
                     }
                     long end256 = System.nanoTime();
                     double difference = end256-start256;
                     time256.add(difference);
 
                 }
-
-            }
         }
+        socket.close();
         //System.out.println(humanReadable(response));
-        Double throughput1024 = calculateThroughput(1024, time1024);
-        Double throughput512 = calculateThroughput(512, time512);
-        Double throughput256 = calculateThroughput(256, time256);
+        Double throughput1024 = calculateThroughput(1024*1024*30, time1024);
+        Double throughput512 = calculateThroughput(512*2048*30, time512);
+        Double throughput256 = calculateThroughput(256*4096*30, time256);
         System.out.println("Throughput for 1024 bytes is " + throughput1024);
         System.out.println("Throughput for 512 bytes is " + throughput512);
         System.out.println("Throughput for 256 bytes is " + throughput256);
-        socket.close();
+
     }
 
-    public static Double calculateThroughput(Integer packetSize, List<Double> time){
+    public static Double calculateThroughput(Integer byteSize, List<Double> time){
         Double sum = 0.0;
         for( Double t : time){
             sum += t;
         }
-        Double throughput = (packetSize * 8)/(sum);
-        return throughput;
+        return  (byteSize * 8)/(sum/1000000000);
     }
 
     public static byte[] messageGenerator(int num){
@@ -119,14 +144,6 @@ public class SecondTCPClient {
                 (byte) (num >> 28),
                 (byte) (num)
         };
-    }
-
-    public static String humanReadable(byte[] message){
-        StringBuilder hex = new StringBuilder();
-        for (byte b : message){
-            hex.append(String.format("%02X", b));
-        }
-        return hex.toString().trim();
     }
 
 

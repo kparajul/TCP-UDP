@@ -1,4 +1,4 @@
-package org.example;
+package org.example.TCP;
 
 import java.io.IOException;
 import java.io.InputStream;

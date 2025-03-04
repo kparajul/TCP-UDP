@@ -25,7 +25,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.example.ServerTCP</mainClass>
+              <mainClass>org.example.TCP.SecondTCPServer</mainClass>
             </manifest>
           </archive>
         </configuration>
