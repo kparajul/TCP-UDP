@@ -1,4 +1,8 @@
-org/example/SecondTCPServer.class
-org/example/SecondTCPClient.class
-org/example/ServerTCP.class
-org/example/ClientTCP.class
+org/example/TCP/ClientTCP.class
+org/example/TCP/SecondTCPServer.class
+org/example/UDP/SecondUDPClient.class
+org/example/UDP/ClientUDP.class
+org/example/TCP/ServerTCP.class
+org/example/UDP/SecondUDPServer.class
+org/example/UDP/ServerUDP.class
+org/example/TCP/SecondTCPClient.class

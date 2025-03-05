@@ -1,4 +1,8 @@
-/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/ClientTCP.java
-/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/SecondTCPClient.java
-/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/SecondTCPServer.java
-/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/ServerTCP.java
+/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/TCP/ClientTCP.java
+/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/TCP/SecondTCPClient.java
+/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/TCP/SecondTCPServer.java
+/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/TCP/ServerTCP.java
+/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/UDP/ClientUDP.java
+/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/UDP/SecondUDPClient.java
+/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/UDP/SecondUDPServer.java
+/Users/kritikaparajuli/IdeaProjects/TCP-UDP/TCP-UDP-Implementation/src/main/java/org/example/UDP/ServerUDP.java

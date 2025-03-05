@@ -40,7 +40,7 @@ public class ClientUDP {
                 decryptedMessage = encryptionFunction(received.getData(), sharedKey);
                 if (Arrays.equals(message, decryptedMessage)) {
                     endTime = System.nanoTime();
-                    rtt = (double) (endTime - startTime) / 1000000; //seconds
+                    rtt = (double) (endTime - startTime) / 1000000000; //seconds
                     time.add(rtt);
 
                 } else {
