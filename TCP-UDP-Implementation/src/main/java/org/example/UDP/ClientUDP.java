@@ -19,7 +19,7 @@ public class ClientUDP {
 
 
         DatagramSocket socket = new DatagramSocket();
-        InetAddress addressServer = InetAddress.getByName("localhost");
+        InetAddress addressServer = InetAddress.getByName("moxie.cs.oswego.edu");
         int portServer = 26915;
 
         byte[] message;

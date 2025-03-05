@@ -15,7 +15,7 @@ public class SecondTCPClient {
         List<Double> time1024 = new ArrayList<>();
         List<Double> time512 = new ArrayList<>();
         List<Double> time256 = new ArrayList<>();
-        Socket socket = new Socket("moxie.cs.oswego.edu", 26914);
+        Socket socket = new Socket("pi.cs.oswego.edu", 26914);
         OutputStream outputStream = socket.getOutputStream();
         InputStream inputStream = socket.getInputStream();
         long sharedKey = 0x01AB44AB229867EFL;
@@ -32,9 +32,8 @@ public class SecondTCPClient {
                         message = messageGenerator(1024);
                         packets[x] = encryptionFunction(message, sharedKey);
                     }
-
-                    long start1024 = System.nanoTime();
                     for (byte[] packet: packets){
+                        long start1024 = System.nanoTime();
                         outputStream.write(packet);
                         outputStream.flush();
                         response = inputStream.readNBytes(8);
@@ -47,10 +46,10 @@ public class SecondTCPClient {
                             System.out.println("Wrong response");
                         }
                         temp++;
+                        long end1024 = System.nanoTime();
+                        double difference = end1024-start1024;
+                        time1024.add(difference);
                     }
-                    long end1024 = System.nanoTime();
-                    double difference = end1024-start1024;
-                    time1024.add(difference);
 
                 }else if(packetSize == 512){
                     int temp= 0;
@@ -59,9 +58,8 @@ public class SecondTCPClient {
                         message = messageGenerator(512);
                         packets[x] = encryptionFunction(message, sharedKey);
                     }
-
-                    long start512 = System.nanoTime();
                     for (byte[] packet: packets){
+                        long start512 = System.nanoTime();
                         outputStream.write(packet);
                         outputStream.flush();
                         response = inputStream.readNBytes(8);
@@ -75,10 +73,12 @@ public class SecondTCPClient {
                         }
                         temp++;
 
+                        long end512 = System.nanoTime();
+                        double difference = end512-start512;
+                        time512.add(difference);
+
                     }
-                    long end512 = System.nanoTime();
-                    double difference = end512-start512;
-                    time512.add(difference);
+
 
                 }else if(packetSize == 256){
                     int temp = 0;
@@ -88,8 +88,8 @@ public class SecondTCPClient {
                         packets[x] = encryptionFunction(message, sharedKey);
                     }
 
-                    long start256 = System.nanoTime();
                     for (byte[] packet: packets){
+                        long start256 = System.nanoTime();
                         outputStream.write(packet);
                         outputStream.flush();
                         response = inputStream.readNBytes(8);
@@ -101,21 +101,22 @@ public class SecondTCPClient {
                             System.out.println("Wrong response");
                         }
                         temp++;
+                        long end256 = System.nanoTime();
+                        double difference = end256-start256;
+                        time256.add(difference);
                     }
-                    long end256 = System.nanoTime();
-                    double difference = end256-start256;
-                    time256.add(difference);
+
 
                 }
         }
         socket.close();
         //System.out.println(humanReadable(response));
-        Double throughput1024 = calculateThroughput(1024*1024*30, time1024);
-        Double throughput512 = calculateThroughput(512*2048*30, time512);
-        Double throughput256 = calculateThroughput(256*4096*30, time256);
-        System.out.println("Throughput for 1024 bytes is " + throughput1024);
-        System.out.println("Throughput for 512 bytes is " + throughput512);
-        System.out.println("Throughput for 256 bytes is " + throughput256);
+        Double throughput1024 = calculateThroughput(1024*1024, time1024);
+        Double throughput512 = calculateThroughput(512*2048, time512);
+        Double throughput256 = calculateThroughput(256*4096, time256);
+        System.out.println("Throughput for 1024 bytes is " + throughput1024 + " bits per second.");
+        System.out.println("Throughput for 512 bytes is " + throughput512 + " bits per second.");
+        System.out.println("Throughput for 256 bytes is " + throughput256 + " bits per second.");
 
     }
 

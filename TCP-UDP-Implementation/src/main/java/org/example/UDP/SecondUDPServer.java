@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -19,12 +18,14 @@ public class SecondUDPServer {
         byte[][] total512 = new byte[2048][512];
         byte[][] total256 = new byte[4096][256];
 
+
         int index1024 = 0;
         int index512 = 0;
         int index256 = 0;
         byte[] buffer = new byte[1024];
 
-        DatagramSocket socket = new DatagramSocket(26915);
+
+        DatagramSocket socket = new DatagramSocket(26916);
         System.out.println("UDP Server started");
         DatagramPacket received = new DatagramPacket(buffer, buffer.length);
 
@@ -38,22 +39,25 @@ public class SecondUDPServer {
                 total1024[index1024] = realData;
                 message = ByteBuffer.allocate(8).putInt(index1024+1).putInt(index1024+1).array();
                 index1024++;
-                System.out.println(getString(encryptionFunction(realData, sharedKey)));
             } else if(realLength == 512){
                 total512[index512] = realData;
                 message = ByteBuffer.allocate(8).putInt(index512+1).putInt(index512+1).array();
                 index512++;
-                System.out.println(getString(encryptionFunction(realData, sharedKey)));
             } else if(realLength == 256){
                 total256[index256] = realData;
                 message = ByteBuffer.allocate(8).putInt(index256+1).putInt(index256+1).array();
                 index256++;
-                System.out.println(getString(encryptionFunction(realData, sharedKey)));
+            } else{
+                System.out.println("There seems to be a problem in packet size");
             }
-
             InetAddress address = received.getAddress();
             int port = received.getPort();
             socket.send(new DatagramPacket(message, message.length, address, port));
+            if ((index256 == 4096 ) && (index512 == 2048) && (index1024  == 1024)){
+                System.out.println("socket closing, expected stuff received");
+                socket.close();
+                break;
+            }
         }
     }
 
